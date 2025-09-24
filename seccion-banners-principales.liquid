@@ -1,0 +1,209 @@
+{% comment %}
+  seccion-banners-principales.liquid
+
+  Esta sección Liquid crea un banner principal con una imagen de fondo.
+  Permite usar la misma imagen tanto en escritorio como en dispositivos móviles,
+  y personalizar el ancho del contenedor en ambos casos a través de la configuración
+  del tema. Toda la imagen es clicable.
+{% endcomment %}
+
+<style>
+  .banner-section {
+    padding: 0;
+    margin: 0 auto;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .banner-link {
+    display: block; /* Makes the link take up the full width and height */
+    text-decoration: none; /* Removes underline from the link */
+    color: inherit; /* Inherits text color from parent */
+  }
+
+  .banner-container {
+    width: 100%;
+    margin: 0 auto;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+    padding-top: {{ 100 | divided_by: section.settings.aspect_ratio_desktop }}%; /* Proporción de aspecto para escritorio */
+  }
+
+  /* Estilos para escritorio */
+  @media screen and (min-width: 769px) {
+    .banner-container {
+      max-width: {{ section.settings.max_width_desktop }}px;
+    }
+  }
+
+  /* Estilos para móvil */
+  @media screen and (max-width: 768px) {
+    .banner-container {
+      max-width: {{ section.settings.max_width_mobile }}px;
+      padding-top: {{ 100 | divided_by: section.settings.aspect_ratio_mobile }}%; /* Proporción de aspecto para móvil */
+    }
+  }
+
+  /* Opcional: Contenido del banner (si lo necesitas) */
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white; /* Color de texto predeterminado, ajusta según tu diseño */
+    width: 80%;
+  }
+
+  /* Estilo para el botón dentro del banner */
+  .banner-button {
+    text-decoration: none;
+    color: white; /* O el color que desees */
+    background-color: rgba(0, 0, 0, 0.5); /* Color de fondo del botón */
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="banner-section">
+  {% if section.settings.banner_image != blank %}
+    {% if section.settings.banner_link != blank %}
+      <a href="{{ section.settings.banner_link }}" class="banner-link">
+    {% endif %}
+    <div
+      class="banner-container"
+      style="background-image: url('{{ section.settings.banner_image | image_url: width: 1920 }}');"
+    >
+      {% comment %} Aquí puedes agregar contenido si lo necesitas, por ejemplo, un título o un botón {% endcomment %}
+      <div class="banner-content">
+        {% if section.settings.banner_heading != blank %}
+          <h2>{{ section.settings.banner_heading }}</h2>
+        {% endif %}
+        {% if section.settings.banner_button_label != blank %}
+          {% comment %}
+            El botón se mostrará, pero el clic principal es el del banner.
+            Esto es útil si quieres que el texto del botón aparezca sobre la imagen.
+          {% endcomment %}
+          <span class="banner-button">
+            {{ section.settings.banner_button_label }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    {% if section.settings.banner_link != blank %}
+      </a>
+    {% endif %}
+  {% else %}
+    <div class="banner-container no-image">
+      {% comment %} Espacio reservado para el banner cuando no hay imagen {% endcomment %}
+      <div class="placeholder-content">
+        <h2>Banner Principal</h2>
+        <p>Añade una imagen en la configuración del tema.</p>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Banner Principal",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Configuración de Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": "Imagen del Banner",
+      "info": "Se usará la misma imagen para todos los dispositivos. Asegúrate de que sea una imagen de alta resolución que funcione bien en diferentes proporciones."
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Color de Fondo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Ancho y Proporción (Escritorio)"
+    },
+    {
+      "type": "range",
+      "id": "max_width_desktop",
+      "min": 800,
+      "max": 2000,
+      "step": 50,
+      "unit": "px",
+      "label": "Ancho Máximo (Escritorio)",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "aspect_ratio_desktop",
+      "min": 1.0,
+      "max": 4.0,
+      "step": 0.1,
+      "unit": ":1",
+      "label": "Proporción de Aspecto (Escritorio)",
+      "info": "Relación ancho/alto (ej: 2.5:1)",
+      "default": 2.5
+    },
+    {
+      "type": "header",
+      "content": "Ancho y Proporción (Móvil)"
+    },
+    {
+      "type": "range",
+      "id": "max_width_mobile",
+      "min": 300,
+      "max": 760,
+      "step": 10,
+      "unit": "px",
+      "label": "Ancho Máximo (Móvil)",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "aspect_ratio_mobile",
+      "min": 0.5,
+      "max": 3.0,
+      "step": 0.1,
+      "unit": ":1",
+      "label": "Proporción de Aspecto (Móvil)",
+      "info": "Relación ancho/alto (ej: 1.5:1)",
+      "default": 1.5
+    },
+    {
+      "type": "header",
+      "content": "Contenido (Opcional)"
+    },
+    {
+      "type": "text",
+      "id": "banner_heading",
+      "label": "Título del Banner",
+      "default": "Título de Ejemplo"
+    },
+    {
+      "type": "text",
+      "id": "banner_button_label",
+      "label": "Texto del Botón",
+      "default": "Comprar ahora"
+    },
+    {
+      "type": "url",
+      "id": "banner_link",
+      "label": "Enlace del Botón"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner Principal",
+      "category": "Imágenes"
+    }
+  ]
+}
+{% endschema %}
